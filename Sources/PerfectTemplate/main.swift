@@ -39,6 +39,8 @@ func handler(request: HTTPRequest, response: HTTPResponse) {
 var routes = Routes()
 routes.add(method: .post, uri: "/api/v1/addTeam", handler: teamAddHandler)
 routes.add(method: .post, uri: "/api/v1/addZone", handler: zoneAddHandler)
+routes.add(method: .post, uri: "/api/v1/allZone", handler: zoneAllHandler)
+
 routes.add(method: .get, uri: "/", handler: handler)
 routes.add(method: .get, uri: "/**",
            handler: StaticFileHandler(documentRoot: "./webroot", allowResponseFilters: true).handleRequest)

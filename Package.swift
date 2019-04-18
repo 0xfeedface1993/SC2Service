@@ -9,7 +9,7 @@ let package = Package(
 		.executable(name: "PerfectTemplate", targets: ["PerfectTemplate"])
 	],
 	dependencies: [
-		.package(url: "https://github.com/0xfeedface1993/SC2MatchCore.git", "0.1.2"..<"1.0.0")
+		.package(url: "https://github.com/0xfeedface1993/SC2MatchCore.git", "0.1.4"..<"1.0.0")
 	],
 	targets: [
 		.target(name: "PerfectTemplate", dependencies: ["StarCraftMatchCore"])

@@ -109,23 +109,79 @@ func zoneAddHandler(request: HTTPRequest, response: HTTPResponse) {
     }
 }
 
-//func zoneAllHandler(request: HTTPRequest, response: HTTPResponse) {
-//    // Respond with a simple message.
-//    response.setHeader(.contentType, value: "application/json")
-//    // Ensure that response.completed() is called when your processing is done.
-//    
-//    guard let contentType = request.header(HTTPRequestHeader.Name.contentType), contentType == "application/json" else {
-//        jsonErrorMaker(response: response)
-//        return
-//    }
-//    
-//    let zone = Zone()
-//    do {
-//        try zone.find([("activeState", "1")])
-//        
-//    }   catch {
-//        log(error: error.localizedDescription)
-//        
-//    }
-//}
+func zoneAllHandler(request: HTTPRequest, response: HTTPResponse) {
+    // Respond with a simple message.
+    response.setHeader(.contentType, value: "application/json")
+    // Ensure that response.completed() is called when your processing is done.
+    
+    guard let contentType = request.header(HTTPRequestHeader.Name.contentType), contentType == "application/json" else {
+        jsonErrorMaker(response: response)
+        return
+    }
+    
+    let zones = read(zoneState: 1)
+    let res = APIResponse()
+    res.code = ResponseErrorCode.ok.rawValue
+    res.msg = ""
+    res.data = ZoneList.convert(zone: zones)
+    do {
+        try response.setBody(json: res)
+    }   catch   {
+        log(error: error.localizedDescription)
+        res.data = nil
+        try! response.setBody(json: res)
+    }
+    response.completed()
+}
+
+class ZoneItem: APIRequest {
+    override func registerName() -> String { return "request-zone-item" }
+    var name = ""
+    var uid = 0
+    
+    override func setJSONValues(_ values: [String : Any]) {
+        self.name = getJSONValue(named: "name", from: values, defaultValue: "")
+        self.uid = getJSONValue(named: "id", from: values, defaultValue: 0)
+    }
+    
+    override func getJSONValues() -> [String : Any] {
+        return [
+            JSONDecoding.objectIdentifierKey:registerName(),
+            "name":name,
+            "id":uid
+        ]
+    }
+    
+    static func convert(zone: Zone) -> ZoneItem {
+        let z = ZoneItem()
+        z.name = zone.name
+        z.uid = zone.id
+        return z
+    }
+}
+
+class ZoneList: APIRequest {
+    override func registerName() -> String { return "request-zone-item" }
+    var list = [ZoneItem]()
+    
+    override func setJSONValues(_ values: [String : Any]) {
+        self.list = getJSONValue(named: "list", from: values, defaultValue: [])
+    }
+    
+    override func getJSONValues() -> [String : Any] {
+        return [
+            JSONDecoding.objectIdentifierKey:registerName(),
+            "list":list.map({ $0.getJSONValues() })
+        ]
+    }
+    
+    static func convert(zone: [Zone]) -> ZoneList {
+        let z = ZoneList()
+        z.list = zone.map({
+            let i = ZoneItem.convert(zone: $0)
+            return i
+        })
+        return z
+    }
+}
 
