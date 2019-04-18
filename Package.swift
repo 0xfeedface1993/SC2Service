@@ -1,6 +1,6 @@
 // swift-tools-version:4.2
 // Generated automatically by Perfect Assistant
-// Date: 2019-04-09 08:17:42 +0000
+// Date: 2019-04-11 03:48:22 +0000
 import PackageDescription
 
 let package = Package(
@@ -9,7 +9,7 @@ let package = Package(
 		.executable(name: "PerfectTemplate", targets: ["PerfectTemplate"])
 	],
 	dependencies: [
-		.package(url: "https://github.com/0xfeedface1993/StarCraftMatchCore.git", from: "0.1.1")
+		.package(url: "https://github.com/0xfeedface1993/SC2MatchCore.git", "0.1.2"..<"1.0.0")
 	],
 	targets: [
 		.target(name: "PerfectTemplate", dependencies: ["StarCraftMatchCore"])

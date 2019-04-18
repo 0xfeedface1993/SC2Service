@@ -28,28 +28,7 @@ func handler(request: HTTPRequest, response: HTTPResponse) {
 	response.setHeader(.contentType, value: "text/html")
 	response.appendBody(string: "<html><title>Hello, world!</title><body>Hello, world!</body></html>")
 	// Ensure that response.completed() is called when your processing is done.
-    save(zone: "美洲") { (isSuccess) in
-        if !isSuccess {
-            log(error: "*** 插入或更新赛区数据失败")
-        }   else {
-            log(message: "插入成功！")
-        }
-    }
 	response.completed()
-}
-
-func testTeamDB() {
-    deleteAllTeamRecords()
-    deleteAllZoneRecords()
-    deleteAllTeamZoneRecords()
-    
-    save(zone: "美洲") { (isSuccess) in
-        if !isSuccess {
-            log(error: "*** 插入或更新赛区数据失败")
-        }   else {
-            log(message: "插入成功！")
-        }
-    }
 }
 
 // Configure one server which:
@@ -58,11 +37,15 @@ func testTeamDB() {
 //        directory (which must be located in the current working directory).
 //    * Performs content compression on outgoing data when appropriate.
 var routes = Routes()
+routes.add(method: .post, uri: "/api/v1/addTeam", handler: teamAddHandler)
+routes.add(method: .post, uri: "/api/v1/addZone", handler: zoneAddHandler)
 routes.add(method: .get, uri: "/", handler: handler)
 routes.add(method: .get, uri: "/**",
            handler: StaticFileHandler(documentRoot: "./webroot", allowResponseFilters: true).handleRequest)
-configDatabase()
 
+configDatabase()
+requestConfig()
+responseConfig()
 
 try HTTPServer.launch(name: "localhost",
                       port: 8181,
