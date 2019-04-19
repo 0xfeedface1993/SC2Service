@@ -42,6 +42,7 @@ routes.add(method: .post, uri: "/api/v1/addZone", handler: zoneAddHandler)
 routes.add(method: .post, uri: "/api/v1/allZone", handler: zoneAllHandler)
 routes.add(method: .post, uri: "/api/v1/allTeam", handler: teamAllHandler)
 routes.add(method: .post, uri: "/api/v1/delTeam", handler: teamDeleteHandler)
+routes.add(method: .post, uri: "/api/v1/delZone", handler: zoneDeleteHandler)
 
 routes.add(method: .get, uri: "/", handler: handler)
 routes.add(method: .get, uri: "/**",

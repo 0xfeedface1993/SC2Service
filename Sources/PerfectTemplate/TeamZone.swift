@@ -354,3 +354,32 @@ func teamDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
     }
 }
 
+/// 删除一个或多个赛区，使用赛区id
+///
+/// - Parameters:
+///   - request: http请求
+///   - response: http响应
+func zoneDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
+    // Respond with a simple message.
+    response.setHeader(.contentType, value: "application/json")
+    // Ensure that response.completed() is called when your processing is done.
+    
+    guard let contentType = request.header(HTTPRequestHeader.Name.contentType), contentType == "application/json" else {
+        jsonErrorMaker(response: response)
+        return
+    }
+    
+    guard let json = parser(request: request, type: TeamDelRequest.self) else {
+        jsonErrorMaker(response: response)
+        return
+    }
+    
+    remove(zonesID: json.teamid) { (isSuccess) in
+        if isSuccess {
+            saveSuccessMaker(response: response)
+        }   else    {
+            saveErrorMaker(response: response)
+        }
+    }
+}
+
