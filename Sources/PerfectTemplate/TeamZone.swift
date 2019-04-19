@@ -10,6 +10,25 @@ import PerfectHTTP
 import PerfectHTTPServer
 import StarCraftMatchCore
 
+class ZoneTeamDelRequest: APIRequest {
+    override func registerName() -> String { return "request-zt-del" }
+    var teamid : Int = 0
+    var zoneid : Int = 0
+    
+    override func setJSONValues(_ values: [String : Any]) {
+        self.teamid = getJSONValue(named: "teamid", from: values, defaultValue: 0)
+        self.zoneid = getJSONValue(named: "zoneid", from: values, defaultValue: 0)
+    }
+    
+    override func getJSONValues() -> [String : Any] {
+        return [
+            JSONDecoding.objectIdentifierKey:registerName(),
+            "teamid":teamid,
+            "zoneid":zoneid
+        ]
+    }
+}
+
 class TeamDelRequest: APIRequest {
     override func registerName() -> String { return "request-team-del" }
     var teamid = [Int]()
@@ -175,7 +194,10 @@ class ZoneList: APIRequest {
             let tz = TeamInZone()
             let pack = tz.request(teamInZone: $0.id)
             let i = ZoneItem.convert(zone: $0)
-            i.team = pack?.values.map({ TeamItem.convert(team: $0.team) }) ?? []
+            i.team = pack?.values.map({
+                TeamItem.convert(team: $0.team)
+                
+            }) ?? []
             return i
         })
         return z
@@ -383,3 +405,26 @@ func zoneDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
     }
 }
 
+func zonevTeamDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
+    // Respond with a simple message.
+    response.setHeader(.contentType, value: "application/json")
+    // Ensure that response.completed() is called when your processing is done.
+    
+    guard let contentType = request.header(HTTPRequestHeader.Name.contentType), contentType == "application/json" else {
+        jsonErrorMaker(response: response)
+        return
+    }
+    
+    guard let json = parser(request: request, type: ZoneTeamDelRequest.self) else {
+        jsonErrorMaker(response: response)
+        return
+    }
+    
+    remove(teamID: json.teamid, zoneID: json.zoneid) { (isSuccess) in
+        if isSuccess {
+            saveSuccessMaker(response: response)
+        }   else    {
+            saveErrorMaker(response: response)
+        }
+    }
+}

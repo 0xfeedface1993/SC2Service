@@ -38,7 +38,7 @@ func parser<T: APIRequest>(request: HTTPRequest, type: T.Type) -> T? {
 
 /// 初始化请求设置
 func requestConfig() {
-    let items: [APIRequest] = [ZoneAddRequest(), TeamAddRequest(), TeamDelRequest()]
+    let items: [APIRequest] = [ZoneAddRequest(), TeamAddRequest(), TeamDelRequest(), ZoneTeamDelRequest()]
     items.forEach({ x in
         JSONDecoding.registerJSONDecodable(name: x.registerName(), creator: { return x })
     })
