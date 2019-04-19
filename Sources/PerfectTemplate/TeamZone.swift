@@ -10,6 +10,22 @@ import PerfectHTTP
 import PerfectHTTPServer
 import StarCraftMatchCore
 
+class TeamDelRequest: APIRequest {
+    override func registerName() -> String { return "request-team-del" }
+    var teamid = [Int]()
+    
+    override func setJSONValues(_ values: [String : Any]) {
+        self.teamid = getJSONValue(named: "teamid", from: values, defaultValue: [])
+    }
+    
+    override func getJSONValues() -> [String : Any] {
+        return [
+            JSONDecoding.objectIdentifierKey:registerName(),
+            "teamid":teamid
+        ]
+    }
+}
+
 class TeamAddRequest: APIRequest {
     override func registerName() -> String { return "request-team-add" }
     var name = ""
@@ -166,7 +182,7 @@ class ZoneList: APIRequest {
     }
 }
 
-/// 添加战队，需要指定赛区、管理员
+/// 添加战队，当teamid不为0时，为添加已有战队，否则需要指定赛区、管理员创建后添加
 ///
 /// - Parameters:
 ///   - request: http请求
@@ -249,6 +265,11 @@ func zoneAddHandler(request: HTTPRequest, response: HTTPResponse) {
     }
 }
 
+/// 获取所有有效赛区
+///
+/// - Parameters:
+///   - request: http请求
+///   - response: http响应
 func zoneAllHandler(request: HTTPRequest, response: HTTPResponse) {
     // Respond with a simple message.
     response.setHeader(.contentType, value: "application/json")
@@ -274,6 +295,11 @@ func zoneAllHandler(request: HTTPRequest, response: HTTPResponse) {
     response.completed()
 }
 
+/// 获取所有有效战队
+///
+/// - Parameters:
+///   - request: http请求
+///   - response: http响应
 func teamAllHandler(request: HTTPRequest, response: HTTPResponse) {
     // Respond with a simple message.
     response.setHeader(.contentType, value: "application/json")
@@ -297,5 +323,34 @@ func teamAllHandler(request: HTTPRequest, response: HTTPResponse) {
         try! response.setBody(json: res)
     }
     response.completed()
+}
+
+/// 删除一个或多个战队，使用战队id
+///
+/// - Parameters:
+///   - request: http请求
+///   - response: http响应
+func teamDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
+    // Respond with a simple message.
+    response.setHeader(.contentType, value: "application/json")
+    // Ensure that response.completed() is called when your processing is done.
+    
+    guard let contentType = request.header(HTTPRequestHeader.Name.contentType), contentType == "application/json" else {
+        jsonErrorMaker(response: response)
+        return
+    }
+    
+    guard let json = parser(request: request, type: TeamDelRequest.self) else {
+        jsonErrorMaker(response: response)
+        return
+    }
+    
+    remove(teamsID: json.teamid) { (isSuccess) in
+        if isSuccess {
+            saveSuccessMaker(response: response)
+        }   else    {
+            saveErrorMaker(response: response)
+        }
+    }
 }
 
