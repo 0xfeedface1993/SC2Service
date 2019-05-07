@@ -152,7 +152,11 @@ func matchBatchHandler(request: HTTPRequest, response: HTTPResponse) {
         return
     }
     
-    log(message: "\(json.getJSONValues())")
+    for i in json.players {
+        print("a: \(find(player: i.playera.name, race: i.playera.race, nation: i.playera.nation))")
+        print("b: \(find(player: i.playerb.name, race: i.playerb.race, nation: i.playerb.nation))")
+    }
+    
     
     saveSuccessMaker(response: response)
 }

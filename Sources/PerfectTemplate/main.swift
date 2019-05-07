@@ -51,6 +51,7 @@ routes.add(method: .get, uri: "/**",
            handler: StaticFileHandler(documentRoot: "./webroot", allowResponseFilters: true).handleRequest)
 
 configDatabase()
+configurePostgresDB() 
 requestConfig()
 responseConfig()
 
