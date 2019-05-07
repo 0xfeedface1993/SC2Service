@@ -152,10 +152,15 @@ func matchBatchHandler(request: HTTPRequest, response: HTTPResponse) {
         return
     }
     
-    for i in json.players {
-        print("a: \(find(player: i.playera.name, race: i.playera.race, nation: i.playera.nation))")
-        print("b: \(find(player: i.playerb.name, race: i.playerb.race, nation: i.playerb.nation))")
-    }
+//    for i in json.players {
+//        print("a: \(find(player: i.playera.name, race: i.playera.race, nation: i.playera.nation))")
+//        print("b: \(find(player: i.playerb.name, race: i.playerb.race, nation: i.playerb.nation))")
+//    }
+    
+//    for i in json.teams {
+//        let suffix = String(i.teama.page.split(separator: "/").last!).replacingOccurrences(of: "_", with: " ")
+//        print("\(find(team: i.teama.name, lpname: suffix))")
+//    }
     
     
     saveSuccessMaker(response: response)
