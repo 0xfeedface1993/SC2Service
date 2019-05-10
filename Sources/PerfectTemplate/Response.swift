@@ -14,26 +14,17 @@ enum ResponseErrorCode: Int {
     case saveFailed = 742
 }
 
-class APIResponse: JSONConvertibleObject {
-    static let registerName = "request-response"
-    var code = 200
-    var msg = ""
-    var data : JSONConvertibleObject?
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.code = getJSONValue(named: "code", from: values, defaultValue: 200)
-        self.msg = getJSONValue(named: "msg", from: values, defaultValue: "")
-        self.data = getJSONValue(named: "data", from: values, defaultValue: JSONConvertibleObject())
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:APIResponse.registerName,
-            "data":data ?? [:],
-            "msg":msg,
-            "code":code
-        ]
-    }
+protocol APIResponse: Codable {
+    associatedtype Codable
+    var code : Int { get set }
+    var msg : String { get set }
+    var data : Codable { get set }
+}
+
+struct EmptyResponse: APIResponse {
+    var code : Int = 200
+    var msg : String = ""
+    var data : [String:String] = [:]
 }
 
 /// api请求数据都是json数据，非jsonh格式或缺失参数则返回错误
@@ -67,5 +58,5 @@ func saveSuccessMaker(response: HTTPResponse) {
 }
 
 func responseConfig() {
-    JSONDecoding.registerJSONDecodable(name: APIResponse.registerName, creator: { return APIResponse() })
+//    JSONDecoding.registerJSONDecodable(name: APIResponse.registerName, creator: { return APIResponse() })
 }

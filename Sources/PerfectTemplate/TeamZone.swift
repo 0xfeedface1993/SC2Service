@@ -10,200 +10,89 @@ import PerfectHTTP
 import PerfectHTTPServer
 import StarCraftMatchCore
 
-class ZoneTeamDelRequest: APIRequest {
-    override func registerName() -> String { return "request-zt-del" }
-    var teamid : Int = 0
-    var zoneid : Int = 0
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.teamid = getJSONValue(named: "teamid", from: values, defaultValue: 0)
-        self.zoneid = getJSONValue(named: "zoneid", from: values, defaultValue: 0)
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "teamid":teamid,
-            "zoneid":zoneid
-        ]
-    }
+struct ZoneTeamDelRequest: Codable {
+    var teamid : Int
+    var zoneid : Int
 }
 
-class TeamDelRequest: APIRequest {
-    override func registerName() -> String { return "request-team-del" }
-    var teamid = [Int]()
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.teamid = getJSONValue(named: "teamid", from: values, defaultValue: [])
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "teamid":teamid
-        ]
-    }
+struct TeamDelRequest: Codable {
+    var teamid : [Int]
 }
 
-class TeamAddRequest: APIRequest {
-    override func registerName() -> String { return "request-team-add" }
-    var name = ""
-    var manager = ""
-    var teamid : Int = 0
-    var zone : Int = 0
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.name = getJSONValue(named: "name", from: values, defaultValue: "")
-        self.zone = getJSONValue(named: "zone", from: values, defaultValue: 0)
-        self.teamid = getJSONValue(named: "teamid", from: values, defaultValue: 0)
-        self.manager = getJSONValue(named: "manager", from: values, defaultValue: "")
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "name":name,
-            "zone":zone,
-            "manager":manager,
-            "teamid":teamid
-        ]
-    }
+struct TeamAddRequest: Codable {
+    var name: String
+    var manager: String
+    var teamid : Int
+    var zone : Int
 }
 
-class ZoneAddRequest: APIRequest {
-    override func registerName() -> String { return "request-zone-add" }
-    var name = ""
-    var zone = ""
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.name = getJSONValue(named: "name", from: values, defaultValue: "")
-        self.zone = getJSONValue(named: "zone", from: values, defaultValue: "")
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "name":name,
-            "zone":zone
-        ]
-    }
+struct ZoneAddRequest: Codable {
+    var name : String
+    var zone : String
 }
 
-class TeamItem: APIRequest {
-    override func registerName() -> String { return "request-team-item" }
-    var name = ""
-    var uid = 0
-    var manager = ""
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.name = getJSONValue(named: "name", from: values, defaultValue: "")
-        self.manager = getJSONValue(named: "manager", from: values, defaultValue: "")
-        self.uid = getJSONValue(named: "id", from: values, defaultValue: 0)
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "name":name,
-            "id":uid,
-            "manager":manager
-        ]
-    }
+struct TeamItem: Codable {
+    var name : String
+    var uid : Int
+    var manager : String
     
     static func convert(team: Team) -> TeamItem {
-        let z = TeamItem()
-        z.name = team.name
-        z.uid = team.id
-        z.manager = team.mananger
+        let z = TeamItem(name: team.name, uid: team.id, manager: team.mananger)
         return z
     }
 }
 
-class TeamList: APIRequest {
-    override func registerName() -> String { return "request-team-list" }
-    var list = [TeamItem]()
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.list = getJSONValue(named: "list", from: values, defaultValue: [])
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "list":list.map({ $0.getJSONValues() })
-        ]
-    }
+struct TeamList: Codable {
+    var list : [TeamItem]
     
     static func convert(teams: [Team]) -> TeamList {
-        let z = TeamList()
-        z.list = teams.map({
+        let z = TeamList(list: teams.map({
             let i = TeamItem.convert(team: $0)
             return i
-        })
+        }))
         return z
     }
 }
 
-class ZoneItem: APIRequest {
-    override func registerName() -> String { return "request-zone-item" }
-    var name = ""
-    var uid = 0
-    var team = [TeamItem]()
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.name = getJSONValue(named: "name", from: values, defaultValue: "")
-        self.uid = getJSONValue(named: "id", from: values, defaultValue: 0)
-        self.team = getJSONValue(named: "team", from: values, defaultValue: [])
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "name":name,
-            "id":uid,
-            "team": team.map({ $0.getJSONValues() })
-        ]
-    }
+struct ZoneItem: Codable {
+    var name : String
+    var uid : Int
+    var team : [TeamItem]
     
     static func convert(zone: Zone) -> ZoneItem {
-        let z = ZoneItem()
-        z.name = zone.name
-        z.uid = zone.id
+        let z = ZoneItem(name: zone.name, uid: zone.id, team: [])
         return z
     }
 }
 
-class ZoneList: APIRequest {
-    override func registerName() -> String { return "request-zone-list" }
-    var list = [ZoneItem]()
-    
-    override func setJSONValues(_ values: [String : Any]) {
-        self.list = getJSONValue(named: "list", from: values, defaultValue: [])
-    }
-    
-    override func getJSONValues() -> [String : Any] {
-        return [
-            JSONDecoding.objectIdentifierKey:registerName(),
-            "list":list.map({ $0.getJSONValues() })
-        ]
-    }
-    
+struct ZoneList: Codable {
+    var list : [ZoneItem]
+   
     static func convert(zone: [Zone]) -> ZoneList {
-        let z = ZoneList()
-        z.list = zone.map({
+        let z = zone.map({ x -> ZoneItem in
+            var zitem = ZoneItem.convert(zone: x)
             let tz = TeamInZone()
-            let pack = tz.request(teamInZone: $0.id)
-            let i = ZoneItem.convert(zone: $0)
-            i.team = pack?.values.map({
-                TeamItem.convert(team: $0.team)
-                
+            let pack = tz.request(teamInZone: x.id)
+            zitem.team = pack?.values.map({ y in
+                TeamItem.convert(team: y.team)
             }) ?? []
-            return i
+            return zitem
         })
-        return z
+        return ZoneList(list: z)
     }
 }
 
+struct ZoneResponse: APIResponse {
+    var code: Int
+    var msg: String
+    var data: ZoneList
+}
+
+struct TeamResponse: APIResponse {
+    var code: Int
+    var msg: String
+    var data: TeamList
+}
 /// 添加战队，当teamid不为0时，为添加已有战队，否则需要指定赛区、管理员创建后添加
 ///
 /// - Parameters:
@@ -219,7 +108,7 @@ func teamAddHandler(request: HTTPRequest, response: HTTPResponse) {
         return
     }
     
-    guard let json = parser(request: request, type: TeamAddRequest.self) else {
+    guard let json: TeamAddRequest = parser(request: request) else {
         jsonErrorMaker(response: response)
         return
     }
@@ -273,7 +162,7 @@ func zoneAddHandler(request: HTTPRequest, response: HTTPResponse) {
         return
     }
     
-    guard let json = parser(request: request, type: ZoneAddRequest.self) else {
+    guard let json: ZoneAddRequest = parser(request: request) else {
         jsonErrorMaker(response: response)
         return
     }
@@ -303,16 +192,12 @@ func zoneAllHandler(request: HTTPRequest, response: HTTPResponse) {
     }
     
     let zones = read(zoneState: 1)
-    let res = APIResponse()
-    res.code = ResponseErrorCode.ok.rawValue
-    res.msg = ""
-    res.data = ZoneList.convert(zone: zones)
+    let res = ZoneResponse(code: ResponseErrorCode.ok.rawValue, msg: "", data: ZoneList.convert(zone: zones))
     do {
         try response.setBody(json: res)
     }   catch   {
         log(error: error.localizedDescription)
-        res.data = nil
-        try! response.setBody(json: res)
+        try! response.setBody(json: EmptyResponse())
     }
     response.completed()
 }
@@ -333,16 +218,12 @@ func teamAllHandler(request: HTTPRequest, response: HTTPResponse) {
     }
     
     let teams = read(teamState: 1)
-    let res = APIResponse()
-    res.code = ResponseErrorCode.ok.rawValue
-    res.msg = ""
-    res.data = TeamList.convert(teams: teams)
+    let res = TeamResponse(code: ResponseErrorCode.ok.rawValue, msg: "", data: TeamList.convert(teams: teams))
     do {
         try response.setBody(json: res)
     }   catch   {
         log(error: error.localizedDescription)
-        res.data = nil
-        try! response.setBody(json: res)
+         try! response.setBody(json: EmptyResponse())
     }
     response.completed()
 }
@@ -362,7 +243,7 @@ func teamDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
         return
     }
     
-    guard let json = parser(request: request, type: TeamDelRequest.self) else {
+    guard let json: TeamDelRequest = parser(request: request) else {
         jsonErrorMaker(response: response)
         return
     }
@@ -391,7 +272,7 @@ func zoneDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
         return
     }
     
-    guard let json = parser(request: request, type: TeamDelRequest.self) else {
+    guard let json: TeamDelRequest = parser(request: request) else {
         jsonErrorMaker(response: response)
         return
     }
@@ -415,7 +296,7 @@ func zonevTeamDeleteHandler(request: HTTPRequest, response: HTTPResponse) {
         return
     }
     
-    guard let json = parser(request: request, type: ZoneTeamDelRequest.self) else {
+    guard let json: ZoneTeamDelRequest = parser(request: request) else {
         jsonErrorMaker(response: response)
         return
     }
