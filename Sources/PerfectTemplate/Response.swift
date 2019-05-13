@@ -22,7 +22,7 @@ protocol APIResponse: Codable {
 }
 
 struct EmptyResponse: APIResponse {
-    var code : Int = 200
+    var code : Int = ResponseErrorCode.ok.rawValue
     var msg : String = ""
     var data : [String:String] = [:]
 }
