@@ -74,7 +74,7 @@ struct PlayerMatch: Codable {
     
     func convertToStorm() -> Match? {
         guard let a = find(player: self.playera.name, race: self.playera.race, nation: self.playera.nation),
-            let b = find(player: self.playerb.name, race: self.playerb.race, nation: self.playerb.nation) else {
+            let b = find(player: self.playerb.name, race: self.playerb.race, nation: self.playerb.nation), a.id != 0, b.id != 0 else {
                 log(error: "Not found player: \(self.playera.name), \(self.playerb.name)")
                 return nil
         }
@@ -181,4 +181,63 @@ func matchBatchHandler(request: HTTPRequest, response: HTTPResponse) {
     }
     
     saveSuccessMaker(response: response)
+}
+
+func todayMatchHandler(request: HTTPRequest, response: HTTPResponse) {
+    // Respond with a simple message.
+    
+    let matches = Match()
+    do {
+        try matches.findAll()
+        let rows = matches.rows()
+        let teams = rows.filter({ $0.type == 0 }).map({ row -> Match.MatchGroupResult? in
+            let x = PGroup()
+            let y = PGroup()
+            do {
+                try x.get(row.playera)
+                try y.get(row.playerb)
+                let match = Match.MatchGroupResult(a: x.transformResult(), b: y.transformResult(), id: row.id, type: row.type, raceA: row.racea, raceB: row.raceb, page: row.page, event: row.event, utc: row.utcTime)
+                return match
+            }   catch   {
+                log(error: "Read \(row.playera), \(row.playerb) failed: \(error.localizedDescription)")
+                return nil
+            }
+        }).filter({ $0 != nil }).map({ $0! })
+        let players = rows.filter({ $0.type == 1 }).map({ row -> Match.MatchPlayerResult? in
+            let x = PPlayer()
+            let y = PPlayer()
+            do {
+                try x.get(row.playera)
+                try y.get(row.playerb)
+                return Match.MatchPlayerResult(a: x.transformResult(), b: y.transformResult(), id: row.id, type: row.type, raceA: row.racea, raceB: row.raceb, page: row.page, event: row.event, utc: row.utcTime)
+            }   catch   {
+                log(error: "Read \(row.playera), \(row.playerb) failed: \(error.localizedDescription)")
+                return nil
+            }
+        }).filter({ $0 != nil }).map({ $0! })
+        
+        let res = MatchResponse(code: ResponseErrorCode.ok.rawValue, msg: "", data: MatchBind(teams: teams, players: players))
+        response.setHeader(.contentType, value: "application/json")
+        try! response.setBody(json: res)
+        response.completed()
+        //select(whereclause: "utcTime >= $0", params: [""], orderby: ["utcTime"])
+    } catch {
+        log(error: error.localizedDescription)
+    
+        let res = EmptyArrayResponse()
+        response.setHeader(.contentType, value: "application/json")
+        try! response.setBody(json: res)
+        response.completed()
+    }
+}
+
+struct MatchBind: Codable {
+    var teams : [Match.MatchGroupResult]
+    var players : [Match.MatchPlayerResult]
+}
+
+struct MatchResponse: APIResponse {
+    var code : Int
+    var msg : String
+    var data : MatchBind
 }

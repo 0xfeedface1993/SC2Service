@@ -45,6 +45,7 @@ routes.add(method: .post, uri: "/api/v1/delTeam", handler: teamDeleteHandler)
 routes.add(method: .post, uri: "/api/v1/delZone", handler: zoneDeleteHandler)
 routes.add(method: .post, uri: "/api/v1/delZonevTeam", handler: zonevTeamDeleteHandler)
 routes.add(method: .post, uri: "/api/v1/matchBatchLoad", handler: matchBatchHandler)
+routes.add(method: .get, uri: "/api/v1/currentMatch", handler: todayMatchHandler)
 
 routes.add(method: .get, uri: "/", handler: handler)
 routes.add(method: .get, uri: "/**",
@@ -54,6 +55,8 @@ configDatabase()
 configurePostgresDB() 
 requestConfig()
 responseConfig()
+
+Match.removeAllRecord()
 
 try HTTPServer.launch(name: "localhost",
                       port: 8181,

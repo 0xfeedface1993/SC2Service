@@ -27,6 +27,12 @@ struct EmptyResponse: APIResponse {
     var data : [String:String] = [:]
 }
 
+struct EmptyArrayResponse: APIResponse {
+    var code : Int = ResponseErrorCode.ok.rawValue
+    var msg : String = ""
+    var data : [String] = []
+}
+
 /// api请求数据都是json数据，非jsonh格式或缺失参数则返回错误
 ///
 /// - Parameter response: http响应
